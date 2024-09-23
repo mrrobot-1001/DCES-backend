@@ -1,26 +1,29 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const db = require('./config/db'); // Adjust the path based on your project structure
-const studentRoutes = require('./routes/studentRoutes'); // Adjust the path based on your project structure
+const cors = require('cors'); // Enables Cross-Origin Resource Sharing
+const bodyParser = require('body-parser'); // Parses incoming request bodies
+const db = require('./config/db'); // MySQL connection setup
+const studentRoutes = require('./routes/studentRoutes'); // Importing the student routes
+const authRoutes = require('./routes/auth');
+const adminRouter= require('./routes/admin'); // Importing the login/auth routes
 
 const app = express();
-app.use(cors()); 
-app.use(bodyParser.json()); 
+const PORT = process.env.PORT || 5000;
 
-app.use('/api', studentRoutes);
+// Middleware
+app.use(cors()); // Enable CORS for frontend/backend communication
+app.use(express.json()); // Parse incoming JSON requests
+app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded data
 
-
-db.connect((err) => {
-  if (err) {
-    console.error('Database connection failed:', err);
-    return;
-  }
-  console.log('Connected to the MySQL database.');
+// Routes
+app.use('/api', studentRoutes); // Routes for student-related operations
+app.use('/api', authRoutes); // Routes for login/auth operations
+app.use('/api', adminRouter);
+// Home route for sanity check
+app.get('/', (req, res) => {
+  res.send('Welcome to the Student QR System API');
 });
 
-
-const PORT = process.env.PORT || 5000;
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
