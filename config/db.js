@@ -1,18 +1,21 @@
-const mysql = require('mysql2');
+const { Pool } = require('pg');
 
-const db = mysql.createConnection({
-  host: 'localhost', // Replace with your host
-  user: 'root', // Replace with your MySQL username
-  password: '1001', // Replace with your MySQL password
-  database: 'DCES', // Replace with your database name
+// Configure PostgreSQL connection using provided credentials
+const pool = new Pool({
+  host: 'dpg-csb73o88fa8c73clmd60-a.oregon-postgres.render.com',
+  user: 'dcesmain_user',
+  password: 'qJJBbXHu9Yuekt8yUP7KSnv9gdXA7AA4',
+  database: 'dcesmain',
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false,  // Required for Render's external database connections
+  },
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to the database:', err);
-    return;
-  }
-  console.log('Connected to MySQL database');
+pool.on('connect', () => {
+  console.log('Connected to PostgreSQL database');
 });
 
-module.exports = db;
+module.exports = {
+  query: (text, params) => pool.query(text, params),
+};

@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const db = require('../config/db'); // Your MySQL database connection
+const db = require('../config/db'); // Your PostgreSQL database connection
 const router = express.Router();
 
 // Admin Registration Route
@@ -8,14 +8,14 @@ router.post('/add-admin', async (req, res) => {
   const { username, password } = req.body;
 
   // Check if username already exists
-  const checkQuery = 'SELECT * FROM users WHERE username = ?';
+  const checkQuery = 'SELECT * FROM users WHERE username = $1'; // Updated placeholder
   db.query(checkQuery, [username], async (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Server error');
     }
 
-    if (results.length > 0) {
+    if (results.rows.length > 0) { // PostgreSQL returns results in 'rows'
       // Username already exists
       return res.status(409).json({ message: 'Username already exists' });
     }
@@ -24,7 +24,7 @@ router.post('/add-admin', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insert new admin into the database
-    const insertQuery = 'INSERT INTO users (username, password) VALUES (?, ?)';
+    const insertQuery = 'INSERT INTO users (username, password) VALUES ($1, $2)'; // Updated placeholders
     db.query(insertQuery, [username, hashedPassword], (err) => {
       if (err) {
         console.error(err);
